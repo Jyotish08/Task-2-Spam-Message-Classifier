@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=65.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spam-message-classifier"
+version = "1.0.0"
+description = "A reproducible, production-grade Spam Message Classifier for SMS data using Scikit-Learn and Streamlit"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "CodeNova AI/ML Intern"}
+]
+keywords = ["nlp", "spam-detection", "machine-learning", "text-classification", "scikit-learn"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Communications",
+    "License :: OSI Approved :: MIT License"
+]
+dependencies = [
+    "pandas>=2.0.0,<3.0.0",
+    "numpy>=1.24.0,<3.0.0",
+    "scikit-learn>=1.3.0,<2.0.0",
+    "joblib>=1.3.0,<2.0.0",
+    "matplotlib>=3.7.0,<4.0.0",
+    "seaborn>=0.12.0,<1.0.0",
+    "streamlit>=1.30.0,<2.0.0",
+    "requests>=2.28.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0,<10.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

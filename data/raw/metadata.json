@@ -1,0 +1,11 @@
+{
+  "dataset_name": "SMS Spam Collection",
+  "source_url": "https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip",
+  "citation": "Almeida, T. and Hidalgo, J. (2011). SMS Spam Collection. UCI Machine Learning Repository. https://doi.org/10.24432/C5CC84",
+  "doi": "https://doi.org/10.24432/C5CC84",
+  "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+  "download_timestamp_utc": "2026-10-17T10:49:01.968429+00:00",
+  "raw_file_name": "SMSSpamCollection",
+  "raw_file_sha256": "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
+  "raw_file_size_bytes": 477907
+}

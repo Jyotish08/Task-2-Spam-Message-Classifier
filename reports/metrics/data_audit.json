@@ -1,0 +1,89 @@
+{
+  "total_records": 4,
+  "columns": [
+    "label",
+    "text"
+  ],
+  "class_distribution": {
+    "ham_count": 3,
+    "spam_count": 1,
+    "spam_percentage": 25.0,
+    "imbalance_ratio": "1 spam : 3.0 ham"
+  },
+  "data_integrity": {
+    "missing_text_count": 0,
+    "empty_text_count": 0,
+    "unique_messages_count": 3,
+    "duplicate_messages_count": 1,
+    "conflicting_label_messages_count": 0,
+    "conflicting_samples_preview": [],
+    "malformed_lines_count": 0,
+    "malformed_lines_preview": []
+  },
+  "length_distributions": {
+    "char_length": {
+      "overall": {
+        "mean": 22.0,
+        "std": 2.71,
+        "min": 20,
+        "p25": 20,
+        "median": 21,
+        "p75": 22,
+        "p95": 25,
+        "max": 26
+      },
+      "ham": {
+        "mean": 22.67,
+        "std": 2.89,
+        "min": 21,
+        "p25": 21,
+        "median": 21,
+        "p75": 23,
+        "p95": 25,
+        "max": 26
+      },
+      "spam": {
+        "mean": 20.0,
+        "std": NaN,
+        "min": 20,
+        "p25": 20,
+        "median": 20,
+        "p75": 20,
+        "p95": 20,
+        "max": 20
+      }
+    },
+    "token_length": {
+      "overall": {
+        "mean": 4.75,
+        "std": 1.5,
+        "min": 4,
+        "p25": 4,
+        "median": 4,
+        "p75": 4,
+        "p95": 6,
+        "max": 7
+      },
+      "ham": {
+        "mean": 5.0,
+        "std": 1.73,
+        "min": 4,
+        "p25": 4,
+        "median": 4,
+        "p75": 5,
+        "p95": 6,
+        "max": 7
+      },
+      "spam": {
+        "mean": 4.0,
+        "std": NaN,
+        "min": 4,
+        "p25": 4,
+        "median": 4,
+        "p75": 4,
+        "p95": 4,
+        "max": 4
+      }
+    }
+  }
+}

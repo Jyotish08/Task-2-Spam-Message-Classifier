@@ -1,0 +1,147 @@
+"""Text Preprocessing and Input Validation module for Spam Message Classifier.
+
+Provides deterministic cleaning, normalization, and robust input validation
+for SMS messages before vectorization and inference.
+"""
+
+import re
+from typing import Any, List, Optional
+import unicodedata
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from src.config import MAX_INPUT_LENGTH
+
+
+def validate_input_text(
+    text: Any,
+    max_length: int = MAX_INPUT_LENGTH,
+    allow_empty: bool = False,
+) -> str:
+    """Validates raw input message text for inference and pipeline ingestion.
+
+    Parameters
+    ----------
+    text : Any
+        Input text to validate.
+    max_length : int
+        Maximum allowed character length.
+    allow_empty : bool
+        Whether to allow empty strings (default False).
+
+    Returns
+    -------
+    str
+        Validated, stripped string.
+
+    Raises
+    ------
+    TypeError
+        If text is not a string.
+    ValueError
+        If text is empty or whitespace-only (when allow_empty=False),
+        or exceeds max_length.
+    """
+    if text is None:
+        raise TypeError("Input message cannot be None. Expected a string.")
+
+    if not isinstance(text, str):
+        raise TypeError(
+            f"Input message must be a string, got {type(text).__name__}."
+        )
+
+    stripped = text.strip()
+
+    if not allow_empty and not stripped:
+        raise ValueError(
+            "Input message cannot be empty or contain only whitespace."
+        )
+
+    if len(text) > max_length:
+        raise ValueError(
+            f"Input message length ({len(text)} characters) exceeds safety limit "
+            f"of {max_length} characters."
+        )
+
+    return stripped
+
+
+def clean_text(text: str) -> str:
+    """Cleans and normalizes an SMS message for feature extraction.
+
+    Transformations applied:
+    1. Unicode normalization (NFKC) to unify accents, ligatures, and full-width chars.
+    2. Normalize redundant whitespace (multiple spaces, tabs, newlines -> single space).
+    3. Normalization of currency symbols ($ -> ' dollar ', £ -> ' pound ', € -> ' euro ')
+       so financial prize cues are preserved as distinct informative tokens.
+    4. Normalization of repeated punctuation (e.g. '!!!!' -> ' ! ') to preserve emphasis.
+    5. Stripping boundary whitespace.
+
+    Parameters
+    ----------
+    text : str
+        Raw input SMS text.
+
+    Returns
+    -------
+    str
+        Cleaned and normalized text.
+    """
+    if not isinstance(text, str):
+        text = str(text) if text is not None else ""
+
+    # 1. Unicode normalization
+    normalized = unicodedata.normalize("NFKC", text)
+
+    # 2. Preserve financial & currency indicators common in spam
+    normalized = normalized.replace("£", " pound ")
+    normalized = normalized.replace("$", " dollar ")
+    normalized = normalized.replace("€", " euro ")
+
+    # 3. Separate key punctuation marks that often signify urgent calls-to-action
+    # e.g., exclamation marks, question marks, percentage
+    normalized = re.sub(r"([!?,%])+", r" \1 ", normalized)
+
+    # 4. Collapse multiple whitespace characters into a single space
+    normalized = re.sub(r"\s+", " ", normalized)
+
+    return normalized.strip()
+
+
+class SMSPreprocessor(BaseEstimator, TransformerMixin):
+    """Scikit-Learn compatible transformer for SMS text preprocessing.
+
+    Encapsulates text normalization directly inside a scikit-learn Pipeline
+    to prevent data leakage and guarantee that identical preprocessing is
+    applied during training, cross-validation, testing, and production inference.
+    """
+
+    def __init__(self, lowercase: bool = True):
+        self.lowercase = lowercase
+
+    def fit(self, X: Any, y: Optional[Any] = None) -> "SMSPreprocessor":
+        """Fit method (stateless transformer)."""
+        return self
+
+    def transform(self, X: Any) -> List[str]:
+        """Transforms a collection of raw text messages.
+
+        Parameters
+        ----------
+        X : iterable of strings
+            Raw SMS texts.
+
+        Returns
+        -------
+        List[str]
+            Cleaned and normalized texts.
+        """
+        cleaned_list: List[str] = []
+        for item in X:
+            if not isinstance(item, str):
+                item = str(item) if item is not None else ""
+            cleaned = clean_text(item)
+            if self.lowercase:
+                cleaned = cleaned.lower()
+            cleaned_list.append(cleaned)
+        return cleaned_list

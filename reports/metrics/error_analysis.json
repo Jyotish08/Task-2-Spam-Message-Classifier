@@ -1,0 +1,118 @@
+{
+  "false_positives": [
+    {
+      "index": 254,
+      "text": "Nokia phone is lovly..",
+      "true_label": "ham",
+      "predicted_label": "spam",
+      "spam_probability": 0.9293,
+      "explanation": "Legitimate message mistakenly classified as spam. Likely contains keywords typically correlated with spam (e.g., 'free', numbers, web links, or prize phrasing)."
+    },
+    {
+      "index": 493,
+      "text": "K:)eng rocking in ashes:)",
+      "true_label": "ham",
+      "predicted_label": "spam",
+      "spam_probability": 0.5417,
+      "explanation": "Legitimate message mistakenly classified as spam. Likely contains keywords typically correlated with spam (e.g., 'free', numbers, web links, or prize phrasing)."
+    },
+    {
+      "index": 706,
+      "text": "Unlimited texts. Limited minutes.",
+      "true_label": "ham",
+      "predicted_label": "spam",
+      "spam_probability": 0.5341,
+      "explanation": "Legitimate message mistakenly classified as spam. Likely contains keywords typically correlated with spam (e.g., 'free', numbers, web links, or prize phrasing)."
+    }
+  ],
+  "false_negatives": [
+    {
+      "index": 205,
+      "text": "Sorry I missed your call let's talk when you have the time. I'm on 07090201529",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.0013,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 299,
+      "text": "LookAtMe!: Thanks for your purchase of a video clip from LookAtMe!, you've been charged 35p. Think you can do better? Why not send a video in a MMSto 32323.",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.1728,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 389,
+      "text": "Babe: U want me dont u baby! Im nasty and have a thing 4 filthyguys. Fancy a rude time with a sexy bitch. How about we go slo n hard! Txt XXX SLO(4msgs)",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.0026,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 391,
+      "text": "(Bank of Granite issues Strong-Buy) EXPLOSIVE PICK FOR OUR MEMBERS *****UP OVER 300% *********** Nasdaq Symbol CDGT That is a $5.00 per..",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.458,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 562,
+      "text": "Block Breaker now comes in deluxe format with new features and great graphics from T-Mobile. Buy for just \u00a35 by replying GET BBDELUXE and take the challenge",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.3782,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 636,
+      "text": "thesmszone.com lets you send free anonymous and masked messages..im sending this message from there..do you see the potential for abuse???",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.0382,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 846,
+      "text": "CLAIRE here am havin borin time & am now alone U wanna cum over 2nite? Chat now 09099725823 hope 2 C U Luv CLAIRE xx Calls\u00a31/minmoremobsEMSPOBox45PO139WA",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.3843,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 848,
+      "text": "dating:i have had two of these. Only started after i sent a text to talk sport radio last week. Any connection do you think or coincidence?",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.007,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 863,
+      "text": "Guess who am I?This is the first time I created a web page WWW.ASJESUS.COM read all I wrote. I'm waiting for your opinions. I want to be your friend 1/1",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.0397,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 921,
+      "text": "Hi this is Amy, we will be sending you a free phone number in a couple of days, which will give you an access to all the adult parties...",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.0132,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    },
+    {
+      "index": 941,
+      "text": "I want some cock! My hubby's away, I need a real man 2 satisfy me. Txt WIFE to 89938 for no strings action. (Txt STOP 2 end, txt rec \u00a31.50ea. OTBox 731 LA1 7WS. )",
+      "true_label": "spam",
+      "predicted_label": "ham",
+      "spam_probability": 0.4854,
+      "explanation": "Spam message missed and classified as ham. Likely written in colloquial or subtle conversational style lacking overt promotional buzzwords."
+    }
+  ]
+}

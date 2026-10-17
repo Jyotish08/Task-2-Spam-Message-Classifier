@@ -1,0 +1,62 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+env/
+venv/
+ENV/
+
+# IDE and Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files (keep raw dataset downloaded deterministically, exclude large temp files)
+data/raw/*.zip
+data/raw/SMSSpamCollection
+data/processed/*.parquet
+data/processed/*.feather
+
+# Models (reproducible via python train.py)
+# Keep placeholder or models folder structure, ignore large local model binaries if needed,
+# or tracked via DVC / scripts
+models/*.joblib
+!models/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit local state
+.streamlit/secrets.toml
