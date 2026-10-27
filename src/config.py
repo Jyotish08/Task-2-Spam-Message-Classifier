@@ -53,6 +53,7 @@ ROC_PR_CURVES_PNG = FIGURES_DIR / "roc_pr_curves.png"
 CLASS_DISTRIBUTION_PNG = FIGURES_DIR / "class_distribution.png"
 LENGTH_DISTRIBUTION_PNG = FIGURES_DIR / "message_length_distribution.png"
 DATA_AUDIT_JSON_PATH = METRICS_DIR / "data_audit.json"
+THRESHOLD_ANALYSIS_JSON_PATH = METRICS_DIR / "threshold_analysis.json"
 
 # Reproducibility & Splitting Configuration
 RANDOM_SEED = 42

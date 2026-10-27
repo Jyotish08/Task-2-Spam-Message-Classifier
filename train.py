@@ -22,6 +22,7 @@ from src.config import (
     DATA_AUDIT_JSON_PATH,
     METRICS_JSON_PATH,
     SAVED_MODEL_PATH,
+    THRESHOLD_ANALYSIS_JSON_PATH,
 )
 from src.data_loader import load_raw_dataset
 from src.training import train_and_evaluate_pipeline
@@ -133,10 +134,21 @@ def main() -> int:
     print(f" -> P95 single message prediction:  {latency['p95_single_prediction_ms']} ms")
     print(f" -> Batch throughput:               {latency['throughput_samples_per_sec']} samples/sec")
 
+    # Threshold analysis summary
+    th_eval = results.get("threshold_eval", {})
+    if th_eval:
+        print(f"\nDecision Threshold Analysis (Cross-Validation on Training Set):")
+        print(f" -> Recommended Operating Threshold: {th_eval.get('recommended_threshold')}")
+        print("    Threshold | CV Spam Prec | CV Spam Rec | CV Spam F1 | CV False Positives")
+        print("    " + "-" * 62)
+        for rec in th_eval.get("evaluated_thresholds", []):
+            print(f"    {rec['threshold']:<9.2f} | {rec['cv_spam_precision']:<12.4f} | {rec['cv_spam_recall']:<11.4f} | {rec['cv_spam_f1']:<10.4f} | {rec['cv_false_positives']}")
+
     # Step 5: Artifacts
     print(f"\n[Step 5/5] Artifacts Successfully Saved:")
-    print(f" -> Pipeline:         {SAVED_MODEL_PATH}")
-    print(f" -> Metrics JSON:     {METRICS_JSON_PATH}")
+    print(f" -> Pipeline:           {SAVED_MODEL_PATH}")
+    print(f" -> Metrics JSON:       {METRICS_JSON_PATH}")
+    print(f" -> Threshold JSON:     {THRESHOLD_ANALYSIS_JSON_PATH}")
 
     # Error analysis summary
     error_rep = results["error_report"]

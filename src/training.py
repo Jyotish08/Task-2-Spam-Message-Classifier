@@ -9,13 +9,14 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import joblib
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
@@ -33,6 +34,7 @@ from src.config import (
     ROC_PR_CURVES_PNG,
     SAVED_MODEL_PATH,
     TEST_SIZE,
+    THRESHOLD_ANALYSIS_JSON_PATH,
 )
 from src.evaluation import (
     analyze_errors,
@@ -42,7 +44,7 @@ from src.evaluation import (
     plot_dataset_distributions,
     plot_roc_and_pr_curves,
 )
-from src.preprocessing import SMSPreprocessor
+from src.preprocessing import SMSPreprocessor, get_custom_stop_words
 
 
 def prepare_train_test_split(
@@ -106,15 +108,17 @@ def get_candidate_pipelines() -> Dict[str, Pipeline]:
     """Defines candidate pipelines comparing vectorizers and classification models.
 
     Models:
-    1. MultinomialNB + CountVectorizer (Baseline bag-of-words)
-    2. MultinomialNB + TfidfVectorizer (Naive Bayes with TF-IDF weighting)
-    3. LogisticRegression + TfidfVectorizer (Linear classifier with calibrated probabilities)
+    1. MultinomialNB + CountVectorizer (Baseline bag-of-words with negation-preserving stop words)
+    2. MultinomialNB + TfidfVectorizer (Naive Bayes with TF-IDF weighting and negation-preserving stop words)
+    3. LogisticRegression + TfidfVectorizer (Linear classifier with calibrated probabilities and negation-preserving stop words)
 
     Returns
     -------
     Dict[str, Pipeline]
         Candidate scikit-learn pipelines.
     """
+    custom_stops = get_custom_stop_words(preserve_negations=True)
+
     pipelines = {
         "MultinomialNB_Count": Pipeline(
             [
@@ -125,6 +129,7 @@ def get_candidate_pipelines() -> Dict[str, Pipeline]:
                         ngram_range=(1, 2),
                         min_df=2,
                         max_df=0.95,
+                        stop_words=custom_stops,
                     ),
                 ),
                 ("classifier", MultinomialNB(alpha=0.1)),
@@ -140,6 +145,7 @@ def get_candidate_pipelines() -> Dict[str, Pipeline]:
                         min_df=2,
                         max_df=0.95,
                         sublinear_tf=True,
+                        stop_words=custom_stops,
                     ),
                 ),
                 ("classifier", MultinomialNB(alpha=0.1)),
@@ -155,6 +161,7 @@ def get_candidate_pipelines() -> Dict[str, Pipeline]:
                         min_df=2,
                         max_df=0.95,
                         sublinear_tf=True,
+                        stop_words=custom_stops,
                     ),
                 ),
                 (
@@ -278,6 +285,103 @@ def select_best_model(cv_results: Dict[str, Dict[str, float]]) -> str:
     return best_name
 
 
+def evaluate_decision_thresholds_cv(
+    pipeline: Pipeline,
+    X_train: List[str],
+    y_train: np.ndarray,
+    thresholds: Optional[List[float]] = None,
+    cv_folds: int = CV_FOLDS,
+    random_state: int = RANDOM_SEED,
+) -> Dict[str, Any]:
+    """Evaluates probability decision thresholds strictly on training data via CV.
+
+    Guarantees zero data leakage: threshold metrics are computed using out-of-fold
+    predictions during stratified cross-validation on the training set, completely
+    isolated from the held-out test partition.
+
+    Parameters
+    ----------
+    pipeline : Pipeline
+        Candidate pipeline architecture.
+    X_train : List[str]
+        Training message texts.
+    y_train : np.ndarray
+        Training binary target labels (0=ham, 1=spam).
+    thresholds : Optional[List[float]]
+        List of decision thresholds to evaluate.
+    cv_folds : int
+        Number of cross-validation folds.
+    random_state : int
+        Deterministic random seed.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Dictionary of threshold performance trade-offs and recommended operating point.
+    """
+    if thresholds is None:
+        thresholds = [0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]
+
+    skf = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=random_state)
+    X_arr = np.array(X_train)
+    y_arr = np.array(y_train)
+
+    oof_probs = np.zeros(len(y_arr))
+
+    for train_idx, val_idx in skf.split(X_arr, y_arr):
+        X_tr, y_tr = X_arr[train_idx], y_arr[train_idx]
+        X_val = X_arr[val_idx]
+
+        pipe_clone = Pipeline([(name, step) for name, step in pipeline.steps])
+        pipe_clone.fit(X_tr.tolist(), y_tr)
+
+        if hasattr(pipe_clone, "predict_proba"):
+            oof_probs[val_idx] = pipe_clone.predict_proba(X_val.tolist())[:, 1]
+        else:
+            oof_probs[val_idx] = pipe_clone.predict(X_val.tolist())
+
+    tradeoff_records: List[Dict[str, Any]] = []
+    best_threshold = 0.50
+    best_composite = -1.0
+
+    for th in thresholds:
+        preds = (oof_probs >= th).astype(int)
+        cm = confusion_matrix(y_arr, preds, labels=[0, 1])
+        tn, fp, fn, tp = cm.ravel()
+        p = float(precision_score(y_arr, preds, pos_label=1, zero_division=0))
+        r = float(recall_score(y_arr, preds, pos_label=1, zero_division=0))
+        f = float(f1_score(y_arr, preds, pos_label=1, zero_division=0))
+        macro_f1 = float(f1_score(y_arr, preds, average="macro", zero_division=0))
+
+        composite = 0.5 * macro_f1 + 0.5 * p
+
+        tradeoff_records.append(
+            {
+                "threshold": round(th, 2),
+                "cv_spam_precision": round(p, 4),
+                "cv_spam_recall": round(r, 4),
+                "cv_spam_f1": round(f, 4),
+                "cv_macro_f1": round(macro_f1, 4),
+                "cv_false_positives": int(fp),
+                "cv_false_negatives": int(fn),
+            }
+        )
+
+        if composite > best_composite:
+            best_composite = composite
+            best_threshold = th
+
+    return {
+        "evaluated_thresholds": tradeoff_records,
+        "recommended_threshold": round(best_threshold, 2),
+        "selection_rationale": (
+            "Threshold evaluated strictly on training out-of-fold validation splits. "
+            "Balances maximizing Spam Precision (suppressing false alarms on legitimate messages) "
+            "with maintaining robust Spam Recall."
+        ),
+    }
+
+
 def train_and_evaluate_pipeline(
     df: pd.DataFrame,
     drop_duplicates: bool = True,
@@ -324,6 +428,18 @@ def train_and_evaluate_pipeline(
     # Step 4: Model selection based on documented criteria
     selected_model_name = select_best_model(cv_results)
     best_pipeline = pipelines[selected_model_name]
+
+    # Step 4b: Threshold analysis on training CV folds only (zero leakage)
+    print("    -> Evaluating probability decision thresholds on training CV folds...", flush=True)
+    threshold_eval = evaluate_decision_thresholds_cv(
+        pipeline=best_pipeline,
+        X_train=X_train,
+        y_train=y_train,
+        cv_folds=CV_FOLDS,
+        random_state=RANDOM_SEED,
+    )
+    test_metrics_threshold = threshold_eval["recommended_threshold"]
+    print(f"       Recommended operating threshold from CV: {test_metrics_threshold:.2f}", flush=True)
 
     # Step 5: Fit chosen model on entire training partition
     t_train_start = time.perf_counter()
@@ -406,6 +522,10 @@ def train_and_evaluate_pipeline(
         with open(error_analysis_path, "w", encoding="utf-8") as f:
             json.dump(error_report, f, indent=2)
 
+        # Save threshold analysis JSON
+        with open(THRESHOLD_ANALYSIS_JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump(threshold_eval, f, indent=2)
+
         # Generate plots
         plot_confusion_matrix(
             np.array(test_metrics["confusion_matrix"]["matrix"]),
@@ -427,4 +547,5 @@ def train_and_evaluate_pipeline(
         "test_metrics": test_metrics,
         "comparison_table": comparison_df,
         "error_report": error_report,
+        "threshold_eval": threshold_eval,
     }

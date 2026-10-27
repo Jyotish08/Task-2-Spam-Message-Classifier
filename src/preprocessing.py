@@ -1,16 +1,79 @@
 """Text Preprocessing and Input Validation module for Spam Message Classifier.
 
-Provides deterministic cleaning, normalization, and robust input validation
-for SMS messages before vectorization and inference.
+Provides deterministic cleaning, normalization, tokenization, negation-preserving
+stop-word filtering, and robust input validation for SMS messages.
 """
 
 import re
-from typing import Any, List, Optional
+from typing import Any, FrozenSet, List, Optional
 import unicodedata
 
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 from src.config import MAX_INPUT_LENGTH
+
+# Negation words that carry critical semantic signal in spam detection and must NOT
+# be stripped as ordinary stop words (e.g. "not spam", "no fee", "never expires").
+NEGATION_WORDS: FrozenSet[str] = frozenset(
+    {
+        "not",
+        "no",
+        "never",
+        "nor",
+        "neither",
+        "none",
+        "nobody",
+        "nowhere",
+        "nothing",
+        "hardly",
+        "scarcely",
+        "barely",
+        "cannot",
+        "without",
+    }
+)
+
+
+def get_custom_stop_words(preserve_negations: bool = True) -> List[str]:
+    """Returns a deterministic, sorted stop-word list with optional negation preservation.
+
+    Parameters
+    ----------
+    preserve_negations : bool, default=True
+        If True, excludes critical negation words (e.g. 'not', 'no', 'never')
+        from the stop-word removal list so semantic negation is preserved.
+
+    Returns
+    -------
+    List[str]
+        Sorted list of stop words suitable for CountVectorizer and TfidfVectorizer.
+    """
+    if preserve_negations:
+        filtered = set(ENGLISH_STOP_WORDS) - NEGATION_WORDS
+    else:
+        filtered = set(ENGLISH_STOP_WORDS)
+    return sorted(list(filtered))
+
+
+def tokenize_text(text: str) -> List[str]:
+    """Tokenizes normalized text into word tokens while preserving alphanumeric cues and currency tokens.
+
+    Parameters
+    ----------
+    text : str
+        Normalized input text.
+
+    Returns
+    -------
+    List[str]
+        List of lowercase string tokens.
+    """
+    if not isinstance(text, str):
+        return []
+    # Match alphanumeric words, numbers, and currency words
+    tokens = re.findall(r"(?u)\b\w+\b", text.lower())
+    return tokens
 
 
 def validate_input_text(

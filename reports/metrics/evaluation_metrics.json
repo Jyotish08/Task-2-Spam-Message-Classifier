@@ -1,6 +1,6 @@
 {
   "model_name": "MultinomialNB_TFIDF",
-  "evaluation_timestamp_utc": "2026-10-17T10:59:35.026258+00:00",
+  "evaluation_timestamp_utc": "2026-10-27T14:36:24.282263+00:00",
   "sample_count": 1032,
   "accuracy": 0.9864,
   "macro_f1": 0.9679,
@@ -33,13 +33,13 @@
       ]
     ]
   },
-  "roc_auc": 0.9884,
-  "pr_auc": 0.972,
-  "training_time_sec": 0.3543,
+  "roc_auc": 0.9932,
+  "pr_auc": 0.9763,
+  "training_time_sec": 0.1403,
   "inference_latency": {
-    "mean_single_prediction_ms": 1.702,
-    "p95_single_prediction_ms": 1.987,
-    "mean_batch_prediction_ms": 61.788,
-    "throughput_samples_per_sec": 16702.4
+    "mean_single_prediction_ms": 0.718,
+    "p95_single_prediction_ms": 0.994,
+    "mean_batch_prediction_ms": 25.139,
+    "throughput_samples_per_sec": 41052.3
   }
 }

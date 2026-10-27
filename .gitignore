@@ -43,6 +43,9 @@ data/raw/SMSSpamCollection
 data/processed/*.parquet
 data/processed/*.feather
 
+# Local tool wrappers
+powershell.cmd
+
 # Models (reproducible via python train.py)
 # Keep placeholder or models folder structure, ignore large local model binaries if needed,
 # or tracked via DVC / scripts

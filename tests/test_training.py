@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from src.training import (
+    evaluate_decision_thresholds_cv,
     get_candidate_pipelines,
     prepare_train_test_split,
     select_best_model,
@@ -69,3 +70,61 @@ def test_select_best_model_prefers_precision_and_macro_f1():
     # Score B: 0.5 * 0.96 + 0.5 * 0.88 = 0.920
     selected = select_best_model(cv_dummy)
     assert selected == "ModelA"
+
+
+def test_train_and_predict_on_synthetic_fixture_without_network():
+    """Verifies complete end-to-end training and prediction on a small synthetic dataset without network access."""
+    # Create synthetic dataset with obvious signals
+    records = []
+    for i in range(25):
+        records.append({"label": "ham", "text": f"Hey friend, are you free for coffee number {i} today?"})
+    for i in range(15):
+        records.append({"label": "spam", "text": f"URGENT: Claim your free £1000 prize bonus {i}! Call 0800 now."})
+
+    df = pd.DataFrame(records)
+    train_df, test_df = prepare_train_test_split(df, test_size=0.25, random_state=42)
+
+    pipelines = get_candidate_pipelines()
+    nb_pipe = pipelines["MultinomialNB_TFIDF"]
+
+    # Fit pipeline
+    nb_pipe.fit(train_df["text"].tolist(), train_df["target"].values)
+
+    # Predict on test
+    preds = nb_pipe.predict(test_df["text"].tolist())
+    probs = nb_pipe.predict_proba(test_df["text"].tolist())
+
+    assert len(preds) == len(test_df)
+    assert probs.shape == (len(test_df), 2)
+    assert np.all((probs >= 0.0) & (probs <= 1.0))
+    np.testing.assert_allclose(probs.sum(axis=1), 1.0, atol=1e-5)
+
+
+def test_evaluate_decision_thresholds_cv_structure():
+    """Verifies evaluate_decision_thresholds_cv computes out-of-fold metrics across thresholds."""
+    records = []
+    for i in range(30):
+        records.append({"label": "ham", "text": f"Normal discussion topic {i} at office meeting"})
+    for i in range(20):
+        records.append({"label": "spam", "text": f"Win £500 cash prize {i} text WIN to 80088 immediately"})
+
+    df = pd.DataFrame(records)
+    train_df, _ = prepare_train_test_split(df, test_size=0.20, random_state=42)
+
+    pipe = get_candidate_pipelines()["MultinomialNB_TFIDF"]
+    res = evaluate_decision_thresholds_cv(
+        pipeline=pipe,
+        X_train=train_df["text"].tolist(),
+        y_train=train_df["target"].values,
+        thresholds=[0.3, 0.5, 0.7],
+        cv_folds=3,
+        random_state=42,
+    )
+
+    assert "evaluated_thresholds" in res
+    assert "recommended_threshold" in res
+    assert len(res["evaluated_thresholds"]) == 3
+    for rec in res["evaluated_thresholds"]:
+        assert 0.0 <= rec["cv_spam_precision"] <= 1.0
+        assert 0.0 <= rec["cv_spam_recall"] <= 1.0
+        assert 0.0 <= rec["cv_spam_f1"] <= 1.0

@@ -4,7 +4,14 @@ import pytest
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 
-from src.preprocessing import SMSPreprocessor, clean_text, validate_input_text
+from src.preprocessing import (
+    NEGATION_WORDS,
+    SMSPreprocessor,
+    clean_text,
+    get_custom_stop_words,
+    tokenize_text,
+    validate_input_text,
+)
 
 
 class TestValidateInputText:
@@ -93,3 +100,42 @@ class TestSMSPreprocessorTransformer:
         vocab = pipe.named_steps["vectorizer"].vocabulary_
         assert "pound" in vocab  # from £ normalization
         assert "win" in vocab
+
+
+class TestCustomStopWords:
+    """Test suite for negation-preserving stop-word handling."""
+
+    def test_negations_preserved_in_custom_stop_words(self):
+        stops = get_custom_stop_words(preserve_negations=True)
+        # Critical negation cues must NOT be in the stop-word removal list
+        for neg in ["not", "no", "never", "nor", "neither", "none", "without", "cannot"]:
+            assert neg not in stops, f"Negation '{neg}' should be preserved, but was found in stop words."
+
+        # Standard uninformative words MUST be in the stop words list
+        for standard_stop in ["the", "and", "is", "at", "which", "on", "in"]:
+            assert standard_stop in stops, f"Standard stop word '{standard_stop}' should be filtered."
+
+    def test_negations_removed_when_preservation_disabled(self):
+        stops = get_custom_stop_words(preserve_negations=False)
+        assert "not" in stops
+        assert "no" in stops
+        assert "never" in stops
+
+
+class TestTokenizeText:
+    """Test suite for tokenize_text."""
+
+    def test_tokenize_text_word_extraction(self):
+        sample = "Win £500 cash now! Visit http://prize.com or call 0800."
+        cleaned = clean_text(sample)
+        tokens = tokenize_text(cleaned)
+        assert isinstance(tokens, list)
+        assert len(tokens) > 5
+        assert "win" in tokens
+        assert "pound" in tokens
+        assert "500" in tokens
+        assert "cash" in tokens
+
+    def test_tokenize_text_handles_non_string(self):
+        assert tokenize_text(None) == []
+        assert tokenize_text(12345) == []

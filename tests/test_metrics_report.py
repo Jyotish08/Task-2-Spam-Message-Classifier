@@ -2,9 +2,11 @@
 
 import json
 from pathlib import Path
+import numpy as np
 import pytest
 
 from src.config import COMPARISON_CSV_PATH, COMPARISON_JSON_PATH, METRICS_JSON_PATH
+from src.evaluation import compute_comprehensive_metrics, plot_confusion_matrix
 
 
 def test_metrics_json_report_structure_and_bounds():
@@ -75,3 +77,65 @@ def test_model_comparison_report_exists_and_contains_both_models():
     # Verify one model is selected
     selected_count = sum(1 for m in comp if m.get("Selected") is True)
     assert selected_count == 1, "Exactly one model must be marked Selected"
+
+
+def test_metric_calculation_known_small_examples():
+    """Verifies precision, recall, F1, and confusion matrix against manually calculated small fixtures."""
+    # 4 samples:
+    # Sample 0: true=0 (ham),  pred=0 (ham)  -> TN
+    # Sample 1: true=0 (ham),  pred=1 (spam) -> FP
+    # Sample 2: true=1 (spam), pred=0 (ham)  -> FN
+    # Sample 3: true=1 (spam), pred=1 (spam) -> TP
+    y_true = np.array([0, 0, 1, 1])
+    y_pred = np.array([0, 1, 0, 1])
+    y_prob = np.array([0.1, 0.8, 0.3, 0.9])
+
+    metrics = compute_comprehensive_metrics(y_true, y_pred, y_prob, model_name="FixtureModel")
+
+    # Overall counts
+    assert metrics["sample_count"] == 4
+    assert metrics["accuracy"] == 0.50
+
+    # Confusion matrix
+    cm = metrics["confusion_matrix"]
+    assert cm["tn"] == 1
+    assert cm["fp"] == 1
+    assert cm["fn"] == 1
+    assert cm["tp"] == 1
+    assert cm["matrix"] == [[1, 1], [1, 1]]
+
+    # Spam metrics (positive class = 1)
+    # Precision: TP / (TP + FP) = 1 / 2 = 0.50
+    # Recall: TP / (TP + FN) = 1 / 2 = 0.50
+    # F1: 2 * (0.5 * 0.5) / (0.5 + 0.5) = 0.50
+    spam_m = metrics["spam_metrics"]
+    assert spam_m["precision"] == 0.50
+    assert spam_m["recall"] == 0.50
+    assert spam_m["f1_score"] == 0.50
+    assert spam_m["support"] == 2
+
+    # Ham metrics (negative class = 0)
+    ham_m = metrics["ham_metrics"]
+    assert ham_m["precision"] == 0.50
+    assert ham_m["recall"] == 0.50
+    assert ham_m["f1_score"] == 0.50
+    assert ham_m["support"] == 2
+
+
+def test_confusion_matrix_plot_generation(tmp_path: Path):
+    """Verifies that plot_confusion_matrix creates a valid non-empty PNG file."""
+    dummy_cm = np.array([[800, 5], [10, 120]])
+    target_png = tmp_path / "test_confusion_matrix.png"
+
+    result_path = plot_confusion_matrix(
+        cm=dummy_cm,
+        model_name="TestClassifier",
+        output_path=target_png,
+    )
+
+    assert result_path.exists()
+    assert result_path.stat().st_size > 1000  # Non-trivial image file
+    # Check PNG magic header bytes
+    with open(result_path, "rb") as f:
+        header = f.read(8)
+    assert header == b"\x89PNG\r\n\x1a\n"

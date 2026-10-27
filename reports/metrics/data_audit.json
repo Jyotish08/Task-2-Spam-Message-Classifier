@@ -1,20 +1,20 @@
 {
-  "total_records": 4,
+  "total_records": 5574,
   "columns": [
     "label",
     "text"
   ],
   "class_distribution": {
-    "ham_count": 3,
-    "spam_count": 1,
-    "spam_percentage": 25.0,
-    "imbalance_ratio": "1 spam : 3.0 ham"
+    "ham_count": 4827,
+    "spam_count": 747,
+    "spam_percentage": 13.4,
+    "imbalance_ratio": "1 spam : 6.46 ham"
   },
   "data_integrity": {
     "missing_text_count": 0,
     "empty_text_count": 0,
-    "unique_messages_count": 3,
-    "duplicate_messages_count": 1,
+    "unique_messages_count": 5160,
+    "duplicate_messages_count": 414,
     "conflicting_label_messages_count": 0,
     "conflicting_samples_preview": [],
     "malformed_lines_count": 0,
@@ -23,66 +23,66 @@
   "length_distributions": {
     "char_length": {
       "overall": {
-        "mean": 22.0,
-        "std": 2.71,
-        "min": 20,
-        "p25": 20,
-        "median": 21,
-        "p75": 22,
-        "p95": 25,
-        "max": 26
+        "mean": 80.44,
+        "std": 59.84,
+        "min": 2,
+        "p25": 36,
+        "median": 61,
+        "p75": 122,
+        "p95": 160,
+        "max": 910
       },
       "ham": {
-        "mean": 22.67,
-        "std": 2.89,
-        "min": 21,
-        "p25": 21,
-        "median": 21,
-        "p75": 23,
-        "p95": 25,
-        "max": 26
+        "mean": 71.44,
+        "std": 58.32,
+        "min": 2,
+        "p25": 33,
+        "median": 52,
+        "p75": 93,
+        "p95": 159,
+        "max": 910
       },
       "spam": {
-        "mean": 20.0,
-        "std": NaN,
-        "min": 20,
-        "p25": 20,
-        "median": 20,
-        "p75": 20,
-        "p95": 20,
-        "max": 20
+        "mean": 138.63,
+        "std": 28.85,
+        "min": 13,
+        "p25": 133,
+        "median": 149,
+        "p75": 157,
+        "p95": 162,
+        "max": 223
       }
     },
     "token_length": {
       "overall": {
-        "mean": 4.75,
-        "std": 1.5,
-        "min": 4,
-        "p25": 4,
-        "median": 4,
-        "p75": 4,
-        "p95": 6,
-        "max": 7
+        "mean": 15.59,
+        "std": 11.39,
+        "min": 1,
+        "p25": 7,
+        "median": 12,
+        "p75": 23,
+        "p95": 33,
+        "max": 171
       },
       "ham": {
-        "mean": 5.0,
-        "std": 1.73,
-        "min": 4,
-        "p25": 4,
-        "median": 4,
-        "p75": 5,
-        "p95": 6,
-        "max": 7
+        "mean": 14.3,
+        "std": 11.5,
+        "min": 1,
+        "p25": 7,
+        "median": 11,
+        "p75": 19,
+        "p95": 33,
+        "max": 171
       },
       "spam": {
-        "mean": 4.0,
-        "std": NaN,
-        "min": 4,
-        "p25": 4,
-        "median": 4,
-        "p75": 4,
-        "p95": 4,
-        "max": 4
+        "mean": 23.91,
+        "std": 5.78,
+        "min": 2,
+        "p25": 22,
+        "median": 25,
+        "p75": 28,
+        "p95": 31,
+        "max": 35
       }
     }
   }

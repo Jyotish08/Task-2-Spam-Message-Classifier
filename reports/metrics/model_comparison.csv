@@ -1,4 +1,4 @@
 Model,CV Macro-F1,CV Spam Precision,Test Accuracy,Test Macro-F1,Test Spam Precision,Test Spam Recall,Test Spam F1,Test ROC-AUC,Test PR-AUC,False Positives,False Negatives,Selected
-MultinomialNB_Count,0.9677,0.9635,0.9874,0.9709,0.9528,0.9453,0.949,0.9799,0.9651,6,7,False
-MultinomialNB_TFIDF,0.9676,0.9872,0.9864,0.9679,0.975,0.9141,0.9435,0.9884,0.972,3,11,True
-LogisticRegression_TFIDF,0.967,0.947,0.9855,0.9669,0.9313,0.9531,0.9421,0.9974,0.9861,9,6,False
+MultinomialNB_Count,0.962,0.9535,0.9855,0.966,0.9593,0.9219,0.9402,0.9867,0.9685,5,10,False
+MultinomialNB_TFIDF,0.9646,0.9853,0.9864,0.9679,0.975,0.9141,0.9435,0.9932,0.9763,3,11,True
+LogisticRegression_TFIDF,0.9605,0.9362,0.9826,0.9601,0.9231,0.9375,0.9302,0.993,0.9741,10,8,False

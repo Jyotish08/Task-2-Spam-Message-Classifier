@@ -200,8 +200,34 @@ def parse_sms_spam_file(
     return df, malformed_records
 
 
+def validate_labels(labels: pd.Series) -> None:
+    """Validates that all target labels are strictly known and valid ('ham' or 'spam').
+
+    Parameters
+    ----------
+    labels : pd.Series
+        Series of raw or normalized label strings.
+
+    Raises
+    ------
+    ValueError
+        If any invalid, missing, or unrecognized labels are detected.
+    """
+    if labels.isna().any():
+        raise ValueError("Dataset contains missing (NaN) label values.")
+
+    invalid = set(labels.dropna().unique()) - VALID_LABELS
+    if invalid:
+        raise ValueError(
+            f"Dataset contains invalid target labels: {invalid}. "
+            f"Expected only valid labels: {sorted(list(VALID_LABELS))}."
+        )
+
+
 def audit_dataset(
-    df: pd.DataFrame, malformed_records: Optional[List[Dict[str, Any]]] = None
+    df: pd.DataFrame,
+    malformed_records: Optional[List[Dict[str, Any]]] = None,
+    save_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """Performs a comprehensive audit of the SMS Spam dataset.
 
@@ -218,6 +244,8 @@ def audit_dataset(
         Parsed dataset with columns 'label' and 'text'.
     malformed_records : Optional[List[Dict[str, Any]]]
         List of malformed lines detected during raw parsing.
+    save_path : Optional[Path]
+        If provided, persists the audit report as JSON to this path.
 
     Returns
     -------
@@ -297,18 +325,27 @@ def audit_dataset(
         },
     }
 
-    # Save to metrics directory
-    DATA_AUDIT_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(DATA_AUDIT_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(audit_report, f, indent=2)
+    # Save to metrics directory only when save_path is explicitly provided
+    if save_path:
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(audit_report, f, indent=2)
 
     return audit_report
 
 
 def load_raw_dataset(
     force_download: bool = False,
+    save_audit: bool = True,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """Convenience pipeline to download (if needed), parse, and audit the dataset.
+
+    Parameters
+    ----------
+    force_download : bool, default=False
+        Whether to re-download the archive even if SMSSpamCollection exists.
+    save_audit : bool, default=True
+        Whether to persist the resulting audit JSON report to DATA_AUDIT_JSON_PATH.
 
     Returns
     -------
@@ -318,5 +355,7 @@ def load_raw_dataset(
     """
     raw_path = download_uci_dataset(force_download=force_download)
     df, malformed = parse_sms_spam_file(raw_path)
-    audit = audit_dataset(df, malformed)
+    validate_labels(df["label"])
+    save_path = DATA_AUDIT_JSON_PATH if save_audit else None
+    audit = audit_dataset(df, malformed, save_path=save_path)
     return df, audit

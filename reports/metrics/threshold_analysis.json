@@ -1,0 +1,69 @@
+{
+  "evaluated_thresholds": [
+    {
+      "threshold": 0.3,
+      "cv_spam_precision": 0.9462,
+      "cv_spam_recall": 0.9241,
+      "cv_spam_f1": 0.935,
+      "cv_macro_f1": 0.963,
+      "cv_false_positives": 27,
+      "cv_false_negatives": 39
+    },
+    {
+      "threshold": 0.4,
+      "cv_spam_precision": 0.9708,
+      "cv_spam_recall": 0.9066,
+      "cv_spam_f1": 0.9376,
+      "cv_macro_f1": 0.9645,
+      "cv_false_positives": 14,
+      "cv_false_negatives": 48
+    },
+    {
+      "threshold": 0.5,
+      "cv_spam_precision": 0.985,
+      "cv_spam_recall": 0.8949,
+      "cv_spam_f1": 0.9378,
+      "cv_macro_f1": 0.9647,
+      "cv_false_positives": 7,
+      "cv_false_negatives": 54
+    },
+    {
+      "threshold": 0.6,
+      "cv_spam_precision": 0.9912,
+      "cv_spam_recall": 0.8735,
+      "cv_spam_f1": 0.9286,
+      "cv_macro_f1": 0.9596,
+      "cv_false_positives": 4,
+      "cv_false_negatives": 65
+    },
+    {
+      "threshold": 0.7,
+      "cv_spam_precision": 0.9978,
+      "cv_spam_recall": 0.8638,
+      "cv_spam_f1": 0.926,
+      "cv_macro_f1": 0.9581,
+      "cv_false_positives": 1,
+      "cv_false_negatives": 70
+    },
+    {
+      "threshold": 0.8,
+      "cv_spam_precision": 1.0,
+      "cv_spam_recall": 0.8327,
+      "cv_spam_f1": 0.9087,
+      "cv_macro_f1": 0.9485,
+      "cv_false_positives": 0,
+      "cv_false_negatives": 86
+    },
+    {
+      "threshold": 0.9,
+      "cv_spam_precision": 1.0,
+      "cv_spam_recall": 0.7957,
+      "cv_spam_f1": 0.8862,
+      "cv_macro_f1": 0.936,
+      "cv_false_positives": 0,
+      "cv_false_negatives": 105
+    }
+  ],
+  "recommended_threshold": 0.7,
+  "selection_rationale": "Threshold evaluated strictly on training out-of-fold validation splits. Balances maximizing Spam Precision (suppressing false alarms on legitimate messages) with maintaining robust Spam Recall."
+}

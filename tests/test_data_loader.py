@@ -10,6 +10,7 @@ from src.data_loader import (
     audit_dataset,
     compute_file_sha256,
     parse_sms_spam_file,
+    validate_labels,
 )
 
 
@@ -79,3 +80,20 @@ def test_compute_file_sha256(tmp_path: Path):
     hash2 = compute_file_sha256(test_file)
     assert hash1 == hash2
     assert len(hash1) == 64
+
+
+def test_validate_labels_valid_and_invalid():
+    """Verifies that validate_labels accepts ham/spam and raises ValueError for invalid/missing labels."""
+    # Valid series should pass without error
+    valid_series = pd.Series(["ham", "spam", "ham", "spam"])
+    validate_labels(valid_series)
+
+    # Invalid label should raise ValueError
+    invalid_series = pd.Series(["ham", "unsolicited_commercial", "spam"])
+    with pytest.raises(ValueError, match="invalid target labels"):
+        validate_labels(invalid_series)
+
+    # Missing label (NaN) should raise ValueError
+    missing_series = pd.Series(["ham", None, "spam"])
+    with pytest.raises(ValueError, match="missing .* label values"):
+        validate_labels(missing_series)
